@@ -1,8 +1,8 @@
 CC=gcc
 CXX=g++
 RM=rm -f
-CPPFLAGS=-g 
-LDFLAGS=-g -pthread
+CPPFLAGS= -O3
+LDFLAGS= -pthread
 
 SRCS=src/main.cpp
 OBJS=$(subst .cpp,.o,$(SRCS))

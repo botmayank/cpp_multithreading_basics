@@ -1,6 +1,5 @@
 /*
     Test basic CPP threading with mutexes
-    https://en.cppreference.com/w/cpp/thread/mutex
 */
 
 #include <iostream>
@@ -11,39 +10,31 @@
 #include <thread>
 #include <mutex>
 #include <unistd.h>
+#include <vector>
 
 std::mutex _mutex;
-int shared_val = 99;
+int shared_val = 0;
+int max_count = 100;
 
-void set_100() {
-        int count = 50;
-        while(count--) {
-            std::unique_lock<std::mutex> writeLock(_mutex);
-            shared_val = 100;
-            sleep(0.5);
-        }
-}
-
-void set_50() {
-        int count = 150;
-
-        while(count--) {
-            std::unique_lock<std::mutex> writeLock(_mutex);
-            shared_val = 50;
-            sleep(0.5);
-        }
+void increment_val() {
+    for(int i=0; i < max_count; i++){
+        sleep(0.1);
+        // std::unique_lock<std::mutex> writeLock(_mutex); // uncomment this line to get proper value
+        shared_val++;
+    }
 }
 
 int main() {
     std::cout << "Testing thread sync primitives" << std::endl;
-    std::thread t1(set_100);
-    std::thread t2(set_50);
+    std::vector<std::thread> threads;
+    int num_threads = 50;
+    for(int i = 0; i < num_threads; i++)
+        threads.push_back(std::thread(increment_val));
 
-    // std::cin.get();
-
-    t1.join();
-    t2.join();
-
+    for(auto &t : threads) {
+        t.join();
+    }
+    std::cout << "Expected value of shared_val: " << num_threads * max_count << std::endl;
     std::cout << "Value of shared val: " << shared_val << std::endl;
 
     return 0;
