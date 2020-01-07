@@ -17,17 +17,27 @@ int shared_val = 0;
 int max_count = 100;
 
 void increment_val() {
-    for(int i=0; i < max_count; i++){
-        sleep(0.1);
-        // std::unique_lock<std::mutex> writeLock(_mutex); // uncomment this line to get proper value
-        shared_val++;
+    std::unique_lock<std::mutex> writeLock(_mutex); // comment to get incorrect value
+        for(int i=0; i < max_count; i++){
+            sleep(0.5);        
+            shared_val++;
+        }
+}
+
+void increment_val_try() {
+    std::unique_lock<std::mutex> writeLock(_mutex, std::defer_lock);
+    if(writeLock.try_lock()) {
+        for(int i=0; i < max_count; i++){
+            sleep(0.5);        
+            shared_val++;
+        }
     }
 }
 
 int main() {
     std::cout << "Testing thread sync primitives" << std::endl;
     std::vector<std::thread> threads;
-    int num_threads = 50;
+    int num_threads = 2;
     for(int i = 0; i < num_threads; i++)
         threads.push_back(std::thread(increment_val));
 
